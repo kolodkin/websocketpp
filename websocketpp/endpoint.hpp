@@ -66,6 +66,8 @@ public:
 
     /// Type of message_handler
     typedef typename connection_type::message_handler message_handler;
+    // Type Of Message Write handler
+    typedef typename connection_type::message_write_handler message_write_handler;
     /// Type of message pointers that this endpoint uses
     typedef typename connection_type::message_ptr message_ptr;
 
@@ -323,6 +325,11 @@ public:
         m_alog->write(log::alevel::devel,"set_message_handler");
         scoped_lock_type guard(m_mutex);
         m_message_handler = h;
+    }
+    void set_message_write_handler(message_write_handler h) {
+        m_alog->write(log::alevel::devel, "set_message_write_handler");
+        scoped_lock_type guard(m_mutex);
+        m_message_write_handler = h;
     }
 
     //////////////////////////////////////////
@@ -677,6 +684,8 @@ private:
     http_handler                m_http_handler;
     validate_handler            m_validate_handler;
     message_handler             m_message_handler;
+    message_write_handler       m_message_write_handler;
+
 
     long                        m_open_handshake_timeout_dur;
     long                        m_close_handshake_timeout_dur;

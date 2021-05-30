@@ -279,6 +279,8 @@ public:
 
     // Message handler (needs to know message type)
     typedef lib::function<void(connection_hdl,message_ptr)> message_handler;
+    // Message Write Handler
+    typedef lib::function<void(connection_hdl, message_ptr)> message_write_handler;
 
     /// Type of a pointer to a transport timer handle
     typedef typename transport_con_type::timer_ptr timer_ptr;
@@ -472,6 +474,10 @@ public:
      */
     void set_message_handler(message_handler h) {
         m_message_handler = h;
+    }
+
+    void set_message_write_handler(message_write_handler h) {
+        m_message_write_handler = h;
     }
 
     //////////////////////////////////////////
@@ -1510,6 +1516,7 @@ private:
     http_handler            m_http_handler;
     validate_handler        m_validate_handler;
     message_handler         m_message_handler;
+    message_write_handler   m_message_write_handler;
 
     /// constant values
     long                    m_open_handshake_timeout_dur;
@@ -1605,6 +1612,7 @@ private:
     bool const              m_is_server;
     const lib::shared_ptr<alog_type> m_alog;
     const lib::shared_ptr<elog_type> m_elog;
+    int counter = 0; //todo:mark
 
     rng_type & m_rng;
 

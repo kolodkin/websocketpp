@@ -1809,6 +1809,8 @@ void connection<config>::write_frame() {
         message_ptr next_message = write_pop();
         while (next_message) {
             m_current_msgs.push_back(next_message);
+            //std::cout << "m_current_msgs push: " << m_current_msgs.size() << std::endl;//todo:mark
+
             if (!next_message->get_terminal()) {
                 next_message = write_pop();
             } else {
@@ -1892,10 +1894,17 @@ void connection<config>::handle_write_frame(lib::error_code const & ec)
         m_alog->write(log::alevel::devel,"connection handle_write_frame");
     }
 
-    bool terminal = m_current_msgs.back()->get_terminal();
+    bool terminal = m_current_msgs.back()->get_terminal();     
+
+    for (auto& msg: m_current_msgs) {
+        if (m_message_write_handler) {
+            m_message_write_handler(m_connection_hdl, msg);
+        }
+    }
 
     m_send_buffer.clear();
     m_current_msgs.clear();
+    //std::cout << "m_current_msgs clear: " << m_current_msgs.size() << std::endl;//todo:mark
     // TODO: recycle instead of deleting
 
     if (ec) {
@@ -2215,6 +2224,8 @@ void connection<config>::write_push(typename config::message_type::ptr msg)
 
     m_send_buffer_size += msg->get_payload().size();
     m_send_queue.push(msg);
+    
+    //std::cout << "write_push: send quque: " << m_send_queue.size() << ", buffer size:" << m_send_buffer_size << std::endl; //todo:mark
 
     if (m_alog->static_test(log::alevel::devel)) {
         std::stringstream s;
@@ -2236,8 +2247,9 @@ typename config::message_type::ptr connection<config>::write_pop()
     msg = m_send_queue.front();
 
     m_send_buffer_size -= msg->get_payload().size();
-    m_send_queue.pop();
-
+    m_send_queue.pop();   
+    //std::cout << "write_pop : message count: " << m_send_queue.size() << ", buffer size:" << m_send_buffer_size << std::endl; //todo:mark
+    
     if (m_alog->static_test(log::alevel::devel)) {
         std::stringstream s;
         s << "write_pop: message count: " << m_send_queue.size()
